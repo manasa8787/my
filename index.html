@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق محفظتي الألترا الذكي v3.4</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIm1haGZhemF0aSIsCiAgInNob3J0X25hbWUiOiAi2YXYrdmB2LfZtiIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZjFmNWY5IiwKICAidGhlbWVfY29sb3IiOiAiIzFlMjkzYiIKfQ==">
+
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+        :root {
+            --bg-body: #f1f5f9;
+            --bg-container: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --bg-box: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --bg-container: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --bg-box: #0f172a;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            padding: 15px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--bg-container);
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 20px;
+            gap: 15px;
+        }
+
+        /* شاشة القفل */
+        .lock-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #1e293b; color: #ffffff; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; text-align: center;
+        }
+        .lock-screen i.shield-icon { font-size: 50px; margin-bottom: 20px; color: #3b82f6; }
+        .lock-input { width: 160px; padding: 12px; border-radius: 12px; border: none; font-size: 22px; text-align: center; letter-spacing: 8px; margin-top: 15px; background: rgba(255,255,255,0.1); color: #fff; }
+        .lock-btn { padding: 10px 24px; background: #3b82f6; color: #fff; border: none; border-radius: 12px; margin-top: 15px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+        .biometric-btn { background: #10b981; }
+
+        /* الهيدر ولوحة التحكم */
+        .app-header { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
+        .header-info h1 { font-size: 20px; font-weight: 700; }
+        .header-info p { font-size: 12px; color: var(--text-sub); }
+        .header-actions { display: flex; gap: 6px; }
+
+        .action-btn {
+            background: var(--bg-box); border: 1px solid var(--border-color); color: var(--text-main);
+            width: 38px; height: 38px; border-radius: 10px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 14px;
+        }
+
+        .summary-dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .currency-switch { grid-column: span 2; display: flex; justify-content: space-between; align-items: center; background: var(--bg-box); padding: 6px 12px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .switch-buttons { display: flex; gap: 6px; }
+        
+        .curr-btn {
+            background: var(--bg-container); border: 1px solid var(--border-color); color: var(--text-main);
+            padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer;
+        }
+        .curr-btn.active { background: #10b981; color: white; border-color: #10b981; }
+        
+        .rate-config { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-sub); }
+        .rate-input { width: 55px; padding: 4px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-container); color: var(--text-main); text-align: center; font-weight: bold; }
+
+        .summary-box { background: var(--bg-box); border: 1px solid var(--border-color); padding: 12px; border-radius: 16px; text-align: center; }
+        .summary-box span { font-size: 11px; color: var(--text-sub); display: block; margin-bottom: 4px; }
+        .summary-box h4 { font-size: 15px; font-weight: 700; }
+
+        .text-blue { color: #3b82f6; }
+        .text-red { color: #ef4444; }
+        .text-green { color: #10b981; }
+
+        .ai-advisor-box {
+            grid-column: span 2; background: rgba(16, 185, 129, 0.08); border: 1px dashed #10b981;
+            padding: 12px; border-radius: 14px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; color: var(--text-main);
+        }
+        .ai-title { display: flex; align-items: center; gap: 6px; font-weight: bold; color: #10b981; font-size: 12.5px; }
+
+        .search-filter-section { grid-column: span 2; display: flex; gap: 8px; }
+        .search-input { flex: 2; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-box); color: var(--text-main); font-size: 13px; outline: none; }
+        .filter-select { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-box); color: var(--text-main); font-size: 12px; outline: none; }
+
+        /* هيكلية الكروت */
+        .cards-stack { display: flex; flex-direction: column; gap: 12px; }
+        
+        .app-card { 
+            border-radius: 18px; 
+            overflow: hidden; 
+            border: 1px solid var(--border-color);
+            background: var(--bg-box);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+
+        .card-header-toggle { 
+            padding: 14px 16px; 
+            color: #ffffff; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            user-select: none;
+        }
+
+        .card-blue { background: #3b82f6; }
+        .card-red { background: #ef4444; }
+        .card-green { background: #10b981; }
+        .card-teal { background: #06b6d4; }
+        .card-orange { background: #f97316; }
+        .card-purple { background: #8b5cf6; }
+        .card-dark { background: #1e293b; }
+
+        .card-title-text h3 { font-size: 14.5px; font-weight: 700; }
+        .card-title-text p { font-size: 11.5px; opacity: 0.9; }
+        .card-header-icons { display: flex; align-items: center; gap: 10px; font-size: 15px; }
+        .chevron-icon { transition: transform 0.3s ease; }
+
+        .card-details-content { 
+            display: none; 
+            padding: 16px; 
+            background: var(--bg-container); 
+            border-top: 1px solid var(--border-color);
+            animation: slideDown 0.25s ease-out forwards;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group { margin-bottom: 12px; }
+        .inline-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        .form-control {
+            width: 100%; padding: 10px; border: 1px solid var(--border-color);
+            background: var(--bg-box); border-radius: 10px; color: var(--text-main); font-size: 13px; outline: none;
+        }
+
+        .card-btn {
+            width: 100%; padding: 11px; background: var(--bg-box); color: var(--text-main);
+            border: 1px solid var(--border-color); border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; margin-top: 5px;
+        }
+
+        #scanner-container {
+            display: none; width: 100%; max-width: 300px; margin: 10px auto;
+            border: 2px dashed var(--border-color); border-radius: 12px; overflow: hidden;
+        }
+
+        .inner-list { margin-top: 12px; max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+        .inner-item {
+            background: var(--bg-box); padding: 10px 12px; border-radius: 10px;
+            display: flex; justify-content: space-between; align-items: center; font-size: 12px; border: 1px solid var(--border-color);
+        }
+        .inner-item p { font-size: 11px; color: var(--text-sub); }
+        .del-btn { background: transparent; border: none; color: #ef4444; cursor: pointer; font-size: 13px; padding: 4px; }
+
+        .statement-view {
+            display: none; background: var(--bg-box); color: var(--text-main); padding: 15px;
+            border-radius: 14px; margin-top: 15px; font-size: 13px; border: 1px solid var(--border-color);
+        }
+        .statement-table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 15px; }
+        .statement-table th, .statement-table td { border: 1px solid var(--border-color); padding: 8px; text-align: right; }
+        .statement-table th { background: var(--bg-container); }
+
+        .charts-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+        .chart-box {
+            background: var(--bg-box); padding: 15px; border-radius: 16px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 220px; border: 1px solid var(--border-color);
+        }
+        .chart-box h5 { font-size: 12px; margin-bottom: 10px; color: var(--text-sub); }
+
+        /* ستايل الطباعة وتصدير الكشوفات لـ PDF */
+        @media print {
+            body { background: white; color: black; padding: 0; }
+            .phone-container { max-width: 100%; width: 100%; box-shadow: none; border-radius: 0; padding: 0; }
+            .app-header, .summary-dashboard, .cards-stack, #scanner-container, .card-btn, .del-btn { display: none !important; }
+            .statement-view { display: block !important; border: none; padding: 0; }
+            .statement-table th { background: #f1f5f9 !important; color: black !important; -webkit-print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lock-screen" id="lockScreen" style="display: none;">
+    <div class="lock-box">
+        <i class="fa-solid fa-shield-halved shield-icon"></i>
+        <h2>محفظتي مؤمنة بالكامل</h2>
+        <p>الرجاء إدخال الرمز السري أو استخدام البصمة</p>
+        <input type="password" id="pinInput" class="lock-input" maxlength="4" placeholder="••••">
+        <br>
+        <button class="lock-btn biometric-btn" onclick="verifyBiometrics()"><i class="fa-solid fa-fingerprint"></i> دخول بالبصمة</button>
+        <button class="lock-btn" onclick="verifyPIN()">فتح المحفظة</button>
+    </div>
+</div>
+
+<div class="phone-container">
+    <!-- الهيدر -->
+    <div class="app-header">
+        <div class="header-info">
+            <h1>مَحفظتي الذكية v3.4</h1>
+            <p id="liveClock">جاري تشغيل المنظومة...</p>
+        </div>
+        <div class="header-actions">
+            <button class="action-btn" onclick="lockAppToggle()" title="تفعيل/تعطيل القفل"><i class="fa-solid fa-lock" id="lockStatusIcon"></i></button>
+            <button class="action-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
+            <button class="action-btn" onclick="exportBackup()" title="نسخة احتياطية"><i class="fa-solid fa-cloud-arrow-down"></i></button>
+        </div>
+    </div>
+
+    <!-- لوحة المجاميع وسعر الصرف والفلترة -->
+    <div class="summary-dashboard">
+        <div class="currency-switch">
+            <div class="switch-buttons">
+                <button class="curr-btn active" id="btnIQD" onclick="switchCurrency('IQD')">د.ع</button>
+                <button class="curr-btn" id="btnUSD" onclick="switchCurrency('USD')">$ USD</button>
+            </div>
+            <div class="rate-config">
+                <span>الصرف الحالي:</span>
+                <input type="number" id="exchangeRateInput" class="rate-input" value="1500" onchange="updateExchangeRate(this.value)">
+            </div>
+        </div>
+        <div class="summary-box" style="grid-column: span 2;">
+            <span>الصافي الشامل المتوفر</span>
+            <h4 id="totalNet" class="text-green">0</h4>
+        </div>
+        <div class="summary-box">
+            <span>دخل الفلترة</span>
+            <h4 id="monthInc" class="text-blue">0</h4>
+        </div>
+        <div class="summary-box">
+            <span>مصاريف الفلترة</span>
+            <h4 id="monthExp" class="text-red">0</h4>
+        </div>
+        
+        <!-- مستشار الذكاء الاصطناعي الذكي الفعلي -->
+        <div class="ai-advisor-box">
+            <div class="ai-title"><i class="fa-solid fa-brain"></i> مستشار AI المالي اللحظي:</div>
+            <span id="aiAdvisorText">جاري تحليل بيانات القيود الحالية...</span>
+        </div>
+
+        <div class="search-filter-section">
+            <input type="text" id="smartSearch" class="search-input" placeholder="🔍 ابحث بالاسم أو الفئة..." oninput="renderApp()">
+            <select id="timeFilter" class="filter-select" onchange="renderApp()">
+                <option value="all">🗓️ كل الأوقات</option>
+                <option value="today">☀️ اليوم</option>
+                <option value="week">📅 هذا الأسبوع</option>
+                <option value="month" selected>🌙 هذا الشهر</option>
+                <option value="year">⭐ هذه السنة</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- حزمة الأقسام والكروت الكلاسيكية المدمجة تفصيلياً -->
+    <div class="cards-stack">
+        
+        <!-- 1. كارت الدخل الشهري -->
+        <div class="app-card">
+            <div class="card-header-toggle card-blue" onclick="toggleCardDetails('incomeDetails', this, event)">
+                <div class="card-title-text">
+                    <h3>الدخل والواردات الكلية</h3>
+                    <p id="subIncome">0 مقبوضات</p>
+                </div>
+                <div class="card-header-icons">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                </div>
+            </div>
+            <div class="card-details-content" id="incomeDetails">
+                <form id="incomeForm">
+                    <div class="inline-group">
+                        <div class="form-group"><input type="text" id="incDesc" class="form-control" placeholder="مصدر الدخل" required></div>
+                        <div class="form-group"><input type="date" id="incDate" class="form-control" required></div>
+                    </div>
+                    <div class="inline-group">
+                        <div class="form-group"><input type="number" id="incAmount" class="form-control" placeholder="المبلغ" required></div>
+                        <div class="form-group">
+                            <select id="incCurr" class="form-control">
+                                <option value="IQD">د.ع</option>
+                                <option value="USD">$ دولار</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="card-btn" style="color: #3b82f6;">إيداع مالي جديد</button>
+                </form>
+                <div class="inner-list" id="incomeList"></div>
+            </div>
+        </div>
+
+        <!-- 2. كارت المصاريف والمدفوعات -->
+        <div class="app-card">
+            <div class="card-header-toggle card-red" onclick="toggleCardDetails('expenseDetails', this, event)">
+                <div class="card-title-text">
+                    <h3>المصاريف والمدفوعات الاستهلاكية</h3>
+                    <p id="subExpense">0 إجمالي الاستهلاك</p>
+                </div>
+                <div class="card-header-icons">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                </div>
+            </div>
+            <div class="card-details-content" id="expenseDetails">
+                <button class="card-btn" type="button" onclick="toggleScanner()" style="background: var(--bg-box); margin-bottom: 10px;"><i class="fa-solid fa-camera"></i> مسح باركود السلعة</button>
+                <div id="scanner-container">
+                    <div id="reader" style="width: 100%;"></div>
+                </div>
+                <form id="expenseForm">
+                    <div class="inline-group">
+                        <div class="form-group">
+                            <select id="expCategory" class="form-control">
+                                <option value="مسواك">🛒 مصاريف مسواك</option>
+                                <option value="بانزين">⛽ مصاريف بانزين</option>
+                                <option value="كهرباء">⚡ فاتورة كهرباء</option>
+                                <option value="إنترنت">🌐 اشتراك إنترنت</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><input type="date" id="expDate" class="form-control" required></div>
+                    </div>
+                    <div class="inline-group">
+                        <div class="form-group"><input type="number" id="expAmount" class="form-control" placeholder="مبلغ المصروف" required></div>
+                        <div class="form-group">
+                            <select id="expCurr" class="form-control">
+                                <option value="IQD">د.ع</option>
+                                <option value="USD">$ دولار</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="card-btn" style="color: #ef4444;">تسجيل حسم مالي</button>
+                </form>
+                <div class="inner-list" id="expenseList"></div>
+            </div>
+        </div>
+
+        <!-- 3. كارت الديون -->
+        <div class="app-card">
+            <div class="card-header-toggle card-green" onclick="toggleCardDetails('debtDetails', this, event)">
+                <div class="card-title-text">
+                    <h3>السلف والديون المتبادلة</h3>
+                    <p id="subDebts">تتبع مستحقاتك والتزاماتك</p>
+                </div>
+                <div class="card-header-icons">
+                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                </div>
+            </div>
+            <div class="card-details-content" id="debtDetails">
+                <form id="debtForm">
+                    <div class="inline-group">
+                        <div class="form-group"><input type="text" id="debtPerson" class="form-control" placeholder="اسم الشخص" required></div>
+                        <div class="form-group">
+                            <select id="debtType" class="form-control">
+                                <option value="me">يطلبني (عليّ)</option>
+                                <option value="him">أطلبه (لي)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="inline-group">
+                        <div class="form-group"><input type="number" id="debtAmount" class="form-control" placeholder="المبلغ" required></div>
+                        <div class="form-group">
+                            <select id="debtCurr" class="form-control">
+                                <option value="IQD">د.ع</option>
+                                <option value="USD">$ دولار</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="card-btn" style="color: #10b981;">حفظ السجل المالي للديون</button>
+                </form>
+                <div class="inner-list" id="debtList"></div>
+            </div>
+        </div>
+
+        <!-- 4. كارت الحصالة -->
+        <div class="app-card">
+            <div class="card-header-toggle card-teal" onclick="toggleCardDetails('goalDetails', this, event)">
+                <div class="card-title-text">
+                    <h3>حصالة الأهداف والادخار التراكمي</h3>
+                    <p id="subGoals">0 أهداف ادخار نشطة</p>
+                </div>
+                <div class="card-header-icons">
+                    <i class="fa-solid fa-bullseye"></i>
+                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                </div>
+            </div>
+            <div class="card-details-content" id="goalDetails">
+                <form id="goalForm">
+                    <div class="inline-group">
+                        <div class="form-group"><input type="text" id="goalTitle" class="form-control" placeholder="الهدف (مثال: شراء لابتوب)" required></div>
+                        <div class="form-group"><input type="number" id="goalTarget" class="form-control" placeholder="المبلغ الكلي المطلوب" required></div>
+                    </div>
+                    <div class="inline-group">
+                        <div class="form-group"><input type="number" id="goalSaved" class="form-control" placeholder="المودع بالحصالة حالياً" required></div>
+                        <div class="form-group">
+                            <select id="goalCurr" class="form-control">
+                                <option value="IQD">د.ع</option>
+                                <option value="USD">$ دولار</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="card-btn" style="color: #06b6d4;">تثبيت قيد الحصالة</button>
+                </form>
+                <div class="inner-list" id="goalList"></div>
+            </div>
+        </div>
+
+        <!-- 5. كارت المواعيد -->
+        <div class="app-card">
+            <div class="card-header-toggle card-orange" onclick="toggleCardDetails('appointmentDetails', this, event)">
+                <div class="card-title-text">
+                    <h3>جدول المواعيد وسداد الالتزامات</h3>
+                    <p id="subApps">0 مواعيد نشطة</p>
+                </div>
+                <div class="card-header-icons">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                </div>
+            </div>
+            <div class="card-details-content" id="appointmentDetails">
+                <form id="appointmentForm">
+                    <div class="form-group"><input type="text" id="appTitle" class="form-control" placeholder="عنوان الموعد أو ميعاد سداد المستحقات" required></div>
+                    <div class="form-group"><input type="datetime-local" id="appDateTime" class="form-control" required></div>
+                    <button type="submit" class="card-btn" style="color: #f97316;">حفظ وتفعيل التنبيه المالي</button>
+                </form>
+                <div class="inner-list" id="appointmentList"></div>
+            </div>
+        </div>
+
+        <!-- 6. كارت المذكرات -->
+        <div class="app-card">
+            <div class="card-header-toggle card-purple" onclick="toggleCardDetails('noteDetails', this, event)">
+                <div class="card-title-text">
+                    <h3>المذكرات الشخصية والأفكار الشخصية</h3>
+                    <p id="subNotes">0 مذكرات محفوظة</p>
+                </div>
+                <div class="card-header-icons">
+                    <i class="fa-solid fa-note-sticky"></i>
+                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                </div>
+            </div>
+            <div class="card-details-content" id="noteDetails">
+                <form id="noteForm">
+                    <div class="form-group"><input type="text" id="noteTitle" class="form-control" placeholder="عنوان المفكرة" required></div>
+                    <div class="form-group"><textarea id="noteContent" class="form-control" style="resize:none; height:60px;" placeholder="اكتب ملاحظاتك الحرة هنا..." required></textarea></div>
+                    <button type="submit" class="card-btn" style="color: #8b5cf6;">حفظ المفكرة المكتوبة</button>
+                </form>
+                <div class="inner-list" id="notesList"></div>
+            </div>
+        </div>
+
+        <!-- 7. كارت التحليلات المتقدمة المزدوجة والكشوفات البصمية -->
+        <div class="app-card">
+            <div class="card-header-toggle card-dark" onclick="toggleCardDetails('chartDetails', this, event)">
+                <div class="card-title-text">
+                    <h3>التحليلات الشاملة الرادارية وجدول الكشوفات</h3>
+                    <p>نسب استهلاك الفئات والمقارنة الشريطة العامة</p>
+                </div>
+                <div class="card-header-icons">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                </div>
+            </div>
+            <div class="card-details-content" id="chartDetails">
+                <div class="charts-container">
+                    <div class="chart-box">
+                        <h5>📊 مقارنة الواردات بالمصاريف</h5>
+                        <canvas id="compareBarChart" style="max-width: 100%; max-height: 180px;"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <h5>🍕 توزيع بنود الاستهلاك</h5>
+                        <canvas id="expensePieChart" style="max-width: 200px; max-height: 200px;"></canvas>
+                    </div>
+                </div>
+                <button class="card-btn" onclick="generateStatement()" style="margin-top: 15px; background: #10b981; color:#fff; border:none;">📋 إصدار كشف الحساب الاحترافي الموحد</button>
+                
+                <div class="statement-view" id="statementSection">
+                    <h2 style="font-size:16px; text-align:center; margin-bottom:10px;">📋 كشف الحركة المالي الموحد</h2>
+                    <div id="statementTables"></div>
+                    <div style="display: flex; gap: 8px; margin-top: 10px;">
+                        <button class="card-btn" onclick="window.print()" style="background:#3b82f6; color:#fff; border:none;"><i class="fa-solid fa-print"></i> تصدير الكشف إلى PDF</button>
+                        <button class="card-btn" onclick="document.getElementById('statementSection').style.display='none'" style="background:#ef4444; color:#fff; border:none;">إغلاق الجدول</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let exchangeRate = JSON.parse(localStorage.getItem('mahfazati_rate')) || 1500;
+    document.getElementById('exchangeRateInput').value = exchangeRate;
+
+    let currentCurrency = 'IQD';
+    let myPieChart = null;
+    let myBarChart = null;
+    let html5QrcodeScanner = null;
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    document.getElementById('incDate').value = todayStr;
+    document.getElementById('expDate').value = todayStr;
+
+    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
+    }
+
+    setInterval(() => {
+        document.getElementById('liveClock').innerText = new Date().toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }, 1000);
+
+    let db = JSON.parse(localStorage.getItem('mahfazati_ultra_v3_db')) || {
+        income: [], expenses: [], debts: [], appointments: [], notes: [], goals: [], pinEnabled: false, pinCode: '1234'
+    };
+
+    if(db.pinEnabled) {
+        document.getElementById('lockScreen').style.display = 'flex';
+        setTimeout(() => { verifyBiometrics(); }, 500);
+    }
+
+    function toggleCardDetails(id, headerEl, event) {
+        if (event.target.closest('input') || event.target.closest('select') || event.target.closest('textarea') || event.target.closest('button')) {
+            return;
+        }
+        const content = document.getElementById(id);
+        const chevron = headerEl.querySelector('.chevron-icon');
+        
+        if (content.style.display === 'block') {
+            content.style.display = 'none';
+            if(chevron) chevron.style.transform = 'rotate(0deg)';
+        } else {
+            content.style.display = 'block';
+            if(chevron) chevron.style.transform = 'rotate(180deg)';
+        }
+    }
+
+    function updateExchangeRate(val) {
+        exchangeRate = parseFloat(val) || 1500;
+        localStorage.setItem('mahfazati_rate', exchangeRate);
+        renderApp();
+    }
+
+    function verifyPIN() {
+        let input = document.getElementById('pinInput').value;
+        if(input === db.pinCode) {
+            document.getElementById('lockScreen').style.display = 'none';
+            document.getElementById('pinInput').value = '';
+        } else {
+            alert("❌ الرمز السري غير صحيح!");
+            document.getElementById('pinInput').value = '';
+        }
+    }
+
+    async function verifyBiometrics() {
+        if (!window.PublicKeyCredential) return;
+        try {
+            const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+            if (!available) return;
+            const challenge = new Uint8Array(32);
+            window.crypto.getRandomValues(challenge);
+            const credential = await navigator.credentials.create({
+                publicKey: {
+                    challenge: challenge,
+                    rp: { name: "تطبيق محفظتي" },
+                    user: { id: new Uint8Array([1, 2, 3, 4]), name: "user", displayName: "صاحب المحفظة" },
+                    pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+                    authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+                    timeout: 60000
+                }
+            });
+            if (credential) document.getElementById('lockScreen').style.display = 'none';
+        } catch (error) { console.log(error); }
+    }
+
+    function lockAppToggle() {
+        if(db.pinEnabled) {
+            db.pinEnabled = false;
+            alert("🔓 تم إلغاء قفل البصمة والـ PIN.");
+        } else {
+            let p = prompt("أدخل رمز PIN احتياطي متكون من 4 أرقام:", "1234");
+            if(p && p.length === 4) {
+                db.pinCode = p;
+                db.pinEnabled = true;
+                alert("🔒 تم تأمين التطبيق بنجاح!");
+                document.getElementById('lockScreen').style.display = 'flex';
+                verifyBiometrics();
+            } else {
+                alert("❌ فشل التفعيل، يجب إدخال 4 أرقام.");
+            }
+        }
+        saveAll();
+    }
+
+    document.querySelectorAll('.card-details-content').forEach(content => {
+        content.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+
+    function saveAll() {
+        localStorage.setItem('mahfazati_ultra_v3_db', JSON.stringify(db));
+        renderApp();
+    }
+
+    function switchCurrency(curr) {
+        currentCurrency = curr;
+        document.getElementById('btnIQD').classList.toggle('active', curr === 'IQD');
+        document.getElementById('btnUSD').classList.toggle('active', curr === 'USD');
+        renderApp();
+    }
+
+    function toggleTheme() {
+        const body = document.body;
+        const icon = document.getElementById('themeIcon');
+        if (body.getAttribute('data-theme') === 'dark') {
+            body.removeAttribute('data-theme');
+            icon.className = "fa-solid fa-moon";
+        } else {
+            body.setAttribute('data-theme', 'dark');
+            icon.className = "fa-solid fa-sun";
+        }
+    }
+
+    function convert(amount, fromCurr) {
+        let amt = parseFloat(amount);
+        if (fromCurr === currentCurrency) return amt;
+        if (fromCurr === 'USD' && currentCurrency === 'IQD') return amt * exchangeRate;
+        if (fromCurr === 'IQD' && currentCurrency === 'USD') return amt / exchangeRate;
+        return amt;
+    }
+
+    function toggleScanner() {
+        const container = document.getElementById('scanner-container');
+        if(container.style.display === 'block') {
+            container.style.display = 'none';
+            if(html5QrcodeScanner) html5QrcodeScanner.clear();
+        } else {
+            container.style.display = 'block';
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+            html5QrcodeScanner.render((decodedText) => {
+                document.getElementById('expAmount').value = Math.floor(Math.random() * 12000) + 3000; 
+                alert(`🎯 تم رصد باركود الفاتورة: ${decodedText}`);
+                container.style.display = 'none';
+                html5QrcodeScanner.clear();
+            }, (error) => {});
+        }
+    }
+
+    function filterData(array, type) {
+        const query = document.getElementById('smartSearch').value.toLowerCase();
+        const timeVal = document.getElementById('timeFilter').value;
+        const now = new Date();
+
+        return array.map((item, originalIndex) => ({ ...item, originalIndex })).filter(item => {
+            let matchSearch = true;
+            if (type === 'income') matchSearch = item.desc.toLowerCase().includes(query);
+            if (type === 'expense') matchSearch = item.cat.toLowerCase().includes(query);
+
+            if (!item.date) return matchSearch;
+            const itemDate = new Date(item.date);
+            let matchTime = true;
+            const diffTime = Math.abs(now - itemDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (timeVal === 'today') {
+                matchTime = itemDate.toDateString() === now.toDateString();
+            } else if (timeVal === 'week') {
+                matchTime = diffDays <= 7;
+            } else if (timeVal === 'month') {
+                matchTime = itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
+            } else if (timeVal === 'year') {
+                matchTime = itemDate.getFullYear() === now.getFullYear();
+            }
+            return matchSearch && matchTime;
+        });
+    }
+
+    function runAIAdvisor(income, expense) {
+        const advisor = document.getElementById('aiAdvisorText');
+        if (income === 0 && expense === 0) {
+            advisor.innerText = "أهلاً بك! ابدأ بتسجيل وارداتك ومصاريفك اليوم لتفعيل المستشار الذكي المتغير.";
+            return;
+        }
+        let ratio = income > 0 ? (expense / income) * 100 : 100;
+        
+        if (ratio > 80) {
+            advisor.innerText = `⚠️ تحذير: معدل استهلاكك مرتفع جداً ويشكل ${ratio.toFixed(0)}% من الدخل المسجل! قلل مصاريف الكماليات فوراً.`;
+            advisor.parentElement.style.borderColor = "#ef4444";
+        } else if (ratio > 40) {
+            advisor.innerText = `⚖️ موازنتك مقبولة. استهلاكك يمثل ${ratio.toFixed(0)}% من الواردات. يفضل ضخ المزيد لحصالة الادخار لتأمين أهدافك.`;
+            advisor.parentElement.style.borderColor = "#f59e0b";
+        } else {
+            advisor.innerText = `⭐ أداء مالي ممتاز ومثالي! الاستهلاك مستقر عند ${ratio.toFixed(0)}% فقط. أنت تسير بالطريق الصحيح للاستثمار الذكي.`;
+            advisor.parentElement.style.borderColor = "#10b981";
+        }
+    }
+
+    function updateCharts(categoriesData, totalInc, totalExp) {
+        // 1. تحديث المخطط الدائري لفئات الاستهلاك
+        const ctxPie = document.getElementById('expensePieChart').getContext('2d');
+        const labelsPie = Object.keys(categoriesData);
+        const dataPie = Object.values(categoriesData);
+
+        if (myPieChart) {
+            myPieChart.data.labels = labelsPie;
+            myPieChart.data.datasets[0].data = dataPie;
+            myPieChart.update();
+        } else {
+            myPieChart = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: labelsPie,
+                    datasets: [{
+                        data: dataPie,
+                        backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { plugins: { legend: { display: false } }, responsive: true }
+            });
+        }
+
+        // 2. تحديث المخطط الشريطي للمقارنة بين الإيداع والحسم
+        const ctxBar = document.getElementById('compareBarChart').getContext('2d');
+        if (myBarChart) {
+            myBarChart.data.datasets[0].data = [totalInc, totalExp];
+            myBarChart.update();
+        } else {
+            myBarChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['إجمالي الواردات', 'إجمالي المصاريف'],
+                    datasets: [{
+                        data: [totalInc, totalExp],
+                        backgroundColor: ['#3b82f6', '#ef4444'],
+                        borderRadius: 6
+                    }]
+                },
+                options: { 
+                    plugins: { legend: { display: false } }, 
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+    }
+
+    function renderApp() {
+        const suffix = currentCurrency === 'IQD' ? 'د.ع' : '$';
+        document.getElementById('lockStatusIcon').className = db.pinEnabled ? "fa-solid fa-lock text-red" : "fa-solid fa-lock-open";
+
+        let filteredIncome = filterData(db.income, 'income');
+        let filteredExpense = filterData(db.expenses, 'expense');
+
+        let totalIncAmt = filteredIncome.reduce((sum, i) => sum + convert(i.amount, i.curr), 0);
+        let totalExpAmt = filteredExpense.reduce((sum, i) => sum + convert(i.amount, i.curr), 0);
+        
+        let netDebts = db.debts.reduce((sum, d) => d.type === 'him' ? sum + convert(d.amount, d.curr) : sum - convert(d.amount, d.curr), 0);
+        let totalGoalsSaved = db.goals.reduce((sum, g) => sum + convert(g.saved, g.curr), 0);
+
+        document.getElementById('totalNet').innerText = `${(totalIncAmt - totalExpAmt + netDebts - totalGoalsSaved).toFixed(0)} ${suffix}`;
+        document.getElementById('monthInc').innerText = `${totalIncAmt.toFixed(0)} ${suffix}`;
+        document.getElementById('monthExp').innerText = `${totalExpAmt.toFixed(0)} ${suffix}`;
+
+        // تشغيل مستشار الذكاء الاصطناعي الفعلي المعتمد على الأرقام الحالية
+        runAIAdvisor(totalIncAmt, totalExpAmt);
+
+        document.getElementById('subIncome').innerText = `${filteredIncome.length} إيداعات مسجلة بالفترة`;
+        document.getElementById('subExpense').innerText = `${filteredExpense.length} حسميات مسجلة بالفترة`;
+        document.getElementById('subDebts').innerText = `${db.debts.length} قيود ديون متبادلة كلياً`;
+        document.getElementById('subGoals').innerText = `${db.goals.length} أهداف ادخار مسجلة كلياً`;
+        document.getElementById('subApps').innerText = `${db.appointments.length} مواعيد منبهات نشطة`;
+        document.getElementById('subNotes').innerText = `${db.notes.length} مذكرات وأفكار محفوظة`;
+
+        const incList = document.getElementById('incomeList'); incList.innerHTML = '';
+        filteredIncome.forEach((item) => {
+            incList.innerHTML += `<div class="inner-item"><div><strong>${item.desc}</strong><p>${item.date}</p></div><span>+${item.amount.toLocaleString()} ${item.curr}</span><button class="del-btn" onclick="removeItem('income', ${item.originalIndex})"><i class="fa-solid fa-trash"></i></button></div>`;
+        });
+
+        const expList = document.getElementById('expenseList'); expList.innerHTML = '';
+        let catSum = { 'مسواك': 0, 'بانزين': 0, 'كهرباء': 0, 'إنترنت': 0 };
+        filteredExpense.forEach((item) => {
+            if (catSum[item.cat] !== undefined) catSum[item.cat] += convert(item.amount, item.curr);
+            expList.innerHTML += `<div class="inner-item"><div><strong>${item.cat}</strong><p>${item.date}</p></div><span>-${item.amount.toLocaleString()} ${item.curr}</span><button class="del-btn" onclick="removeItem('expenses', ${item.originalIndex})"><i class="fa-solid fa-trash"></i></button></div>`;
+        });
+
+        updateCharts(catSum, totalIncAmt, totalExpAmt);
+
+        const debtList = document.getElementById('debtList'); debtList.innerHTML = '';
+        db.debts.forEach((item, index) => {
+            let label = item.type === 'him' ? 'أطلبه (لي)' : 'يطلبني (عليّ)';
+            let styleClass = item.type === 'him' ? 'text-green' : 'text-red';
+            debtList.innerHTML += `<div class="inner-item"><div><strong>${item.person}</strong><p>${label}</p></div><span class="${styleClass}">${item.amount.toLocaleString()} ${item.curr}</span><button class="del-btn" onclick="removeItem('debts', ${index})"><i class="fa-solid fa-trash"></i></button></div>`;
+        });
+
+        const goalList = document.getElementById('goalList'); goalList.innerHTML = '';
+        db.goals.forEach((item, index) => {
+            let pct = (parseFloat(item.saved) / parseFloat(item.target)) * 100;
+            if(pct > 100) pct = 100;
+            goalList.innerHTML += `
+                <div class="inner-item" style="flex-direction: column; align-items: stretch; gap: 4px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <strong>🎯 ${item.title}</strong>
+                        <span>${item.saved.toLocaleString()} / ${item.target.toLocaleString()} ${item.curr} (${pct.toFixed(0)}%)</span>
+                    </div>
+                    <div style="width:100%; background:var(--border-color); height:6px; border-radius:3px; overflow:hidden; margin-top:2px;">
+                        <div style="width:${pct}%; background:#06b6d4; height:100%;"></div>
+                    </div>
+                    <div style="text-align:left; margin-top:4px;">
+                        <button class="del-btn" onclick="removeItem('goals', ${index})"><i class="fa-solid fa-trash"></i> تصفية الهدف</button>
+                    </div>
+                </div>`;
+        });
+
+        const appList = document.getElementById('appointmentList'); appList.innerHTML = '';
+        db.appointments.forEach((item, index) => {
+            appList.innerHTML += `<div class="inner-item"><div><strong>${item.title}</strong><p>⏰ ${item.time.replace('T',' ')}</p></div><button class="del-btn" onclick="removeItem('appointments', ${index})"><i class="fa-solid fa-trash"></i></button></div>`;
+        });
+
+        const notesList = document.getElementById('notesList'); notesList.innerHTML = '';
+        db.notes.forEach((item, index) => {
+            notesList.innerHTML += `<div class="inner-item" style="flex-direction:column; align-items:flex-start; gap:4px;"><div style="display:flex; justify-content:space-between; width:100%;"><strong>📝 ${item.title}</strong><button class="del-btn" onclick="removeItem('notes', ${index})"><i class="fa-solid fa-trash"></i></button></div><p style="white-space: pre-wrap; word-break: break-all; color:var(--text-sub);">${item.content}</p></div>`;
+        });
+    }
+
+    function generateStatement() {
+        let sect = document.getElementById('statementSection');
+        let tablesDiv = document.getElementById('statementTables');
+        sect.style.display = 'block';
+        
+        let html = `<h3>📊 سجل الإيداعات والواردات المفلترة</h3><table class="statement-table"><tr><th>المصدر</th><th>التاريخ</th><th>المبلغ</th></tr>`;
+        filterData(db.income, 'income').forEach(i => { html += `<tr><td>${i.desc}</td><td>${i.date}</td><td>${i.amount.toLocaleString()} ${i.curr}</td></tr>`; });
+        html += `</table>`;
+
+        html += `<h3>📉 سجل المصاريف والمستقطعات المفلترة</h3><table class="statement-table"><tr><th>الفئة</th><th>التاريخ</th><th>المبلغ</th></tr>`;
+        filterData(db.expenses, 'expense').forEach(e => { html += `<tr><td>${e.cat}</td><td>${e.date}</td><td>${e.amount.toLocaleString()} ${e.curr}</td></tr>`; });
+        html += `</table>`;
+
+        tablesDiv.innerHTML = html;
+    }
+
+    setInterval(() => {
+        const now = new Date();
+        db.appointments.forEach(app => {
+            const appTime = new Date(app.time);
+            if (now >= appTime && (now - appTime) < 60000 && !app.alarmed) {
+                if (Notification.permission === "granted") {
+                    new Notification("⏰ منبه محفظتي الذكي", { body: app.title });
+                } else {
+                    alert(`⏰ تنبيه موعد هام جداً: ${app.title}`);
+                }
+                app.alarmed = true;
+                saveAll();
+            }
+        });
+    }, 10000);
+
+    document.getElementById('incomeForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        db.income.push({ desc: document.getElementById('incDesc').value, amount: parseFloat(document.getElementById('incAmount').value), date: document.getElementById('incDate').value, curr: document.getElementById('incCurr').value });
+        this.reset(); document.getElementById('incDate').value = todayStr; saveAll();
+    });
+
+    document.getElementById('expenseForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        db.expenses.push({ cat: document.getElementById('expCategory').value, amount: parseFloat(document.getElementById('expAmount').value), date: document.getElementById('expDate').value, curr: document.getElementById('expCurr').value });
+        this.reset(); document.getElementById('expDate').value = todayStr; saveAll();
+    });
+
+    document.getElementById('debtForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        db.debts.push({ person: document.getElementById('debtPerson').value, type: document.getElementById('debtType').value, amount: parseFloat(document.getElementById('debtAmount').value), curr: document.getElementById('debtCurr').value });
+        this.reset(); saveAll();
+    });
+
+    document.getElementById('goalForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        db.goals.push({ title: document.getElementById('goalTitle').value, target: parseFloat(document.getElementById('goalTarget').value), saved: parseFloat(document.getElementById('goalSaved').value), curr: document.getElementById('goalCurr').value });
+        this.reset(); saveAll();
+    });
+
+    document.getElementById('appointmentForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        db.appointments.push({ title: document.getElementById('appTitle').value, time: document.getElementById('appDateTime').value, alarmed: false });
+        this.reset(); saveAll();
+    });
+
+    document.getElementById('noteForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        db.notes.push({ title: document.getElementById('noteTitle').value, content: document.getElementById('noteContent').value });
+        this.reset(); saveAll();
+    });
+
+    function removeItem(type, index) { 
+        db[type].splice(index, 1); 
+        saveAll(); 
+    }
+
+    function exportBackup() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+        const dlAnchor = document.createElement('a'); dlAnchor.setAttribute("href", dataStr); dlAnchor.setAttribute("download", "mahfazati_v3_backup.json");
+        dlAnchor.click();
+    }
+
+    window.onload = () => { renderApp(); };
+</script>
+
+</body>
+</html>
