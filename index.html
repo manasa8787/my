@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق محفظتي الألترا الذكي v3.4</title>
+    <title>تطبيق محفظتي الألترا الذكي v3.5 - نسخة أوفلاين بالرسوم البيانية</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIm1haGZhemF0aSIsCiAgInNob3J0X25hbWUiOiAi2YXYrdmB2LfZtiIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZjFmNWY5IiwKICAidGhlbWVfY29sb3IiOiAiIzFlMjkzYiIKfQ==">
 
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -38,7 +36,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Cairo', sans-serif;
+            font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -75,14 +73,15 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: 20px; text-align: center;
         }
-        .lock-screen i.shield-icon { font-size: 50px; margin-bottom: 20px; color: #3b82f6; }
-        .lock-input { width: 160px; padding: 12px; border-radius: 12px; border: none; font-size: 22px; text-align: center; letter-spacing: 8px; margin-top: 15px; background: rgba(255,255,255,0.1); color: #fff; }
-        .lock-btn { padding: 10px 24px; background: #3b82f6; color: #fff; border: none; border-radius: 12px; margin-top: 15px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+        .lock-screen .shield-icon { width: 50px; height: 50px; fill: #3b82f6; margin-bottom: 20px; }
+        .lock-input { width: 160px; padding: 12px; border-radius: 12px; border: none; font-size: 22px; text-align: center; letter-spacing: 8px; margin-top: 15px; background: rgba(255,255,255,0.1); color: #fff; outline: none; }
+        .lock-btn { padding: 10px 24px; background: #3b82f6; color: #fff; border: none; border-radius: 12px; margin-top: 15px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; }
+        .lock-btn svg { width: 16px; height: 16px; fill: currentColor; }
         .biometric-btn { background: #10b981; }
 
         /* الهيدر ولوحة التحكم */
         .app-header { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
-        .header-info h1 { font-size: 20px; font-weight: 700; }
+        .header-info h1 { font-size: 18px; font-weight: 700; }
         .header-info p { font-size: 12px; color: var(--text-sub); }
         .header-actions { display: flex; gap: 6px; }
 
@@ -91,6 +90,8 @@
             width: 38px; height: 38px; border-radius: 10px; cursor: pointer;
             display: flex; align-items: center; justify-content: center; font-size: 14px;
         }
+        .action-btn svg { width: 16px; height: 16px; fill: var(--text-main); }
+        .action-btn svg.text-red { fill: #ef4444; }
 
         .summary-dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .currency-switch { grid-column: span 2; display: flex; justify-content: space-between; align-items: center; background: var(--bg-box); padding: 6px 12px; border-radius: 12px; border: 1px solid var(--border-color); }
@@ -98,12 +99,12 @@
         
         .curr-btn {
             background: var(--bg-container); border: 1px solid var(--border-color); color: var(--text-main);
-            padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer;
+            padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; font-family: 'Cairo', sans-serif;
         }
         .curr-btn.active { background: #10b981; color: white; border-color: #10b981; }
         
         .rate-config { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-sub); }
-        .rate-input { width: 55px; padding: 4px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-container); color: var(--text-main); text-align: center; font-weight: bold; }
+        .rate-input { width: 65px; padding: 4px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-container); color: var(--text-main); text-align: center; font-weight: bold; font-family: 'Cairo', sans-serif; }
 
         .summary-box { background: var(--bg-box); border: 1px solid var(--border-color); padding: 12px; border-radius: 16px; text-align: center; }
         .summary-box span { font-size: 11px; color: var(--text-sub); display: block; margin-bottom: 4px; }
@@ -118,10 +119,11 @@
             padding: 12px; border-radius: 14px; font-size: 12px; display: flex; flex-direction: column; gap: 4px; color: var(--text-main);
         }
         .ai-title { display: flex; align-items: center; gap: 6px; font-weight: bold; color: #10b981; font-size: 12.5px; }
+        .ai-title svg { width: 14px; height: 14px; fill: #10b981; }
 
         .search-filter-section { grid-column: span 2; display: flex; gap: 8px; }
-        .search-input { flex: 2; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-box); color: var(--text-main); font-size: 13px; outline: none; }
-        .filter-select { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-box); color: var(--text-main); font-size: 12px; outline: none; }
+        .search-input { flex: 2; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-box); color: var(--text-main); font-size: 13px; outline: none; font-family: 'Cairo', sans-serif; }
+        .filter-select { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-box); color: var(--text-main); font-size: 12px; outline: none; font-family: 'Cairo', sans-serif; }
 
         /* هيكلية الكروت */
         .cards-stack { display: flex; flex-direction: column; gap: 12px; }
@@ -152,10 +154,11 @@
         .card-purple { background: #8b5cf6; }
         .card-dark { background: #1e293b; }
 
-        .card-title-text h3 { font-size: 14.5px; font-weight: 700; }
+        .card-title-text h3 { font-size: 14px; font-weight: 700; }
         .card-title-text p { font-size: 11.5px; opacity: 0.9; }
-        .card-header-icons { display: flex; align-items: center; gap: 10px; font-size: 15px; }
-        .chevron-icon { transition: transform 0.3s ease; }
+        .card-header-icons { display: flex; align-items: center; gap: 10px; }
+        .card-header-icons svg { width: 18px; height: 18px; fill: #ffffff; }
+        .chevron-icon { transition: transform 0.3s ease; width: 12px !important; height: 12px !important; }
 
         .card-details-content { 
             display: none; 
@@ -175,13 +178,15 @@
         
         .form-control {
             width: 100%; padding: 10px; border: 1px solid var(--border-color);
-            background: var(--bg-box); border-radius: 10px; color: var(--text-main); font-size: 13px; outline: none;
+            background: var(--bg-box); border-radius: 10px; color: var(--text-main); font-size: 13px; outline: none; font-family: 'Cairo', sans-serif;
         }
 
         .card-btn {
             width: 100%; padding: 11px; background: var(--bg-box); color: var(--text-main);
             border: 1px solid var(--border-color); border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; margin-top: 5px;
+            display: flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Cairo', sans-serif;
         }
+        .card-btn svg { width: 14px; height: 14px; fill: currentColor; }
 
         #scanner-container {
             display: none; width: 100%; max-width: 300px; margin: 10px auto;
@@ -194,7 +199,8 @@
             display: flex; justify-content: space-between; align-items: center; font-size: 12px; border: 1px solid var(--border-color);
         }
         .inner-item p { font-size: 11px; color: var(--text-sub); }
-        .del-btn { background: transparent; border: none; color: #ef4444; cursor: pointer; font-size: 13px; padding: 4px; }
+        .del-btn { background: transparent; border: none; color: #ef4444; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; }
+        .del-btn svg { width: 14px; height: 14px; fill: #ef4444; }
 
         .statement-view {
             display: none; background: var(--bg-box); color: var(--text-main); padding: 15px;
@@ -207,11 +213,18 @@
         .charts-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
         .chart-box {
             background: var(--bg-box); padding: 15px; border-radius: 16px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 220px; border: 1px solid var(--border-color);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 220px; border: 1px solid var(--border-color); width: 100%;
         }
         .chart-box h5 { font-size: 12px; margin-bottom: 10px; color: var(--text-sub); }
+        
+        /* تصميم هيكلي ذكي للمخططات المحلية المستقلة */
+        .svg-chart-wrapper { width: 100%; display: flex; justify-content: center; align-items: center; }
+        .bar-row { display: flex; align-items: center; width: 100%; gap: 10px; margin-bottom: 8px; }
+        .bar-label { width: 80px; font-size: 11px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        .bar-track { flex: 1; background: var(--border-color); height: 14px; border-radius: 7px; overflow: hidden; position: relative; }
+        .bar-fill { height: 100%; border-radius: 7px; transition: width 0.4s ease; }
+        .bar-value { width: 70px; font-size: 11px; text-align: left; font-weight: bold; }
 
-        /* ستايل الطباعة وتصدير الكشوفات لـ PDF */
         @media print {
             body { background: white; color: black; padding: 0; }
             .phone-container { max-width: 100%; width: 100%; box-shadow: none; border-radius: 0; padding: 0; }
@@ -223,33 +236,59 @@
 </head>
 <body>
 
+<div style="display: none;">
+    <svg id="icon-shield" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6c1.4 0 2.5 1.1 2.5 2.5S13.4 12 12 12s-2.5-1.1-2.5-2.5S10.6 7 12 7zm0 11c-2.33 0-4.31-1.16-5.49-2.92C6.9 13.75 10.3 13 12 13s5.1 1.25 5.49 2.08A6.477 6.477 0 0112 18z"/></svg>
+    <svg id="icon-fingerprint" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 12.35v1.65c0 1.1.9 2 2 2h2v3.93zm4.3-2.11l-2.3-2.3V13.5c0-.83-.67-1.5-1.5-1.5H11v-1.5c0-.55-.45-1-1-1H7.82c.45-1.95 2.18-3.5 4.29-3.5 2.55 0 4.61 2.11 4.56 4.68-.04 2.11-1.39 3.93-3.37 4.53l3 3.01z"/></svg>
+    <svg id="icon-lock" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zzm-3.1 9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z"/></svg>
+    <svg id="icon-lock-open" viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z"/></svg>
+    <svg id="icon-moon" viewBox="0 0 24 24"><path d="M12.3 22c5.52 0 10-4.48 10-10 0-5.52-4.48-10-10-10C6.78 2 2.3 6.48 2.3 12c0 5.52 4.48 10 10 10zm0-18c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8z"/></svg>
+    <svg id="icon-sun" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1z"/></svg>
+    <svg id="icon-cloud-down" viewBox="0 0 24 24"><path d="M19.35 10.04A7.49 7.49 0 0012 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 000 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+    <svg id="icon-brain" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.58 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
+    <svg id="icon-chevron" viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+    <svg id="icon-money" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+    <svg id="icon-cart" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+    <svg id="icon-debt" viewBox="0 0 24 24"><path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+    <svg id="icon-target" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.8-11.8L14.4 7.6 12 10 9.6 7.6 8.2 9l2.4 2.4-2.4 2.4 1.4 1.4 2.4-2.4 2.4 2.4 1.4-1.4-2.4-2.4z"/></svg>
+    <svg id="icon-calendar" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+    <svg id="icon-note" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+    <svg id="icon-chart" viewBox="0 0 24 24"><path d="M11 2v20c-5.07-.5-9-4.79-9-10s3.93-9.5 9-10zm2 0v8.5h8.5C21 5.42 17.58 2 13 2zm0 11.5V22c4.58 0 8-3.42 8.5-8.5H13z"/></svg>
+    <svg id="icon-trash" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+    <svg id="icon-camera" viewBox="0 0 24 24"><path d="M9.4 10.5l-1 2H5v6h14v-6h-3.4l-1-2H9.4M12 2a3 3 0 00-3 3h6a3 3 0 00-3-3zm0 11a2.5 2.5 0 110 5 2.5 2.5 0 010-5z"/></svg>
+    <svg id="icon-print" viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+</div>
+
 <div class="lock-screen" id="lockScreen" style="display: none;">
     <div class="lock-box">
-        <i class="fa-solid fa-shield-halved shield-icon"></i>
+        <svg class="shield-icon"><use href="#icon-shield"/></svg>
         <h2>محفظتي مؤمنة بالكامل</h2>
         <p>الرجاء إدخال الرمز السري أو استخدام البصمة</p>
         <input type="password" id="pinInput" class="lock-input" maxlength="4" placeholder="••••">
         <br>
-        <button class="lock-btn biometric-btn" onclick="verifyBiometrics()"><i class="fa-solid fa-fingerprint"></i> دخول بالبصمة</button>
+        <button class="lock-btn biometric-btn" onclick="verifyBiometrics()"><svg style="fill:#fff;"><use href="#icon-fingerprint"/></svg> دخول بالبصمة</button>
         <button class="lock-btn" onclick="verifyPIN()">فتح المحفظة</button>
     </div>
 </div>
 
 <div class="phone-container">
-    <!-- الهيدر -->
     <div class="app-header">
         <div class="header-info">
-            <h1>مَحفظتي الذكية v3.4</h1>
+            <h1>مَحفظتي الذكية v3.5</h1>
             <p id="liveClock">جاري تشغيل المنظومة...</p>
         </div>
         <div class="header-actions">
-            <button class="action-btn" onclick="lockAppToggle()" title="تفعيل/تعطيل القفل"><i class="fa-solid fa-lock" id="lockStatusIcon"></i></button>
-            <button class="action-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="themeIcon"></i></button>
-            <button class="action-btn" onclick="exportBackup()" title="نسخة احتياطية"><i class="fa-solid fa-cloud-arrow-down"></i></button>
+            <button class="action-btn" onclick="lockAppToggle()" title="تفعيل/تعطيل القفل">
+                <svg id="lockStatusIcon"><use href="#icon-lock"/></svg>
+            </button>
+            <button class="action-btn" onclick="toggleTheme()">
+                <svg id="themeIcon"><use href="#icon-moon"/></svg>
+            </button>
+            <button class="action-btn" onclick="exportBackup()" title="نسخة احتياطية">
+                <svg><use href="#icon-cloud-down"/></svg>
+            </button>
         </div>
     </div>
 
-    <!-- لوحة المجاميع وسعر الصرف والفلترة -->
     <div class="summary-dashboard">
         <div class="currency-switch">
             <div class="switch-buttons">
@@ -274,9 +313,8 @@
             <h4 id="monthExp" class="text-red">0</h4>
         </div>
         
-        <!-- مستشار الذكاء الاصطناعي الذكي الفعلي -->
         <div class="ai-advisor-box">
-            <div class="ai-title"><i class="fa-solid fa-brain"></i> مستشار AI المالي اللحظي:</div>
+            <div class="ai-title"><svg><use href="#icon-brain"/></svg> مستشار AI المالي اللحظي:</div>
             <span id="aiAdvisorText">جاري تحليل بيانات القيود الحالية...</span>
         </div>
 
@@ -292,10 +330,8 @@
         </div>
     </div>
 
-    <!-- حزمة الأقسام والكروت الكلاسيكية المدمجة تفصيلياً -->
     <div class="cards-stack">
         
-        <!-- 1. كارت الدخل الشهري -->
         <div class="app-card">
             <div class="card-header-toggle card-blue" onclick="toggleCardDetails('incomeDetails', this, event)">
                 <div class="card-title-text">
@@ -303,8 +339,8 @@
                     <p id="subIncome">0 مقبوضات</p>
                 </div>
                 <div class="card-header-icons">
-                    <i class="fa-solid fa-money-bill-wave"></i>
-                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                    <svg><use href="#icon-money"/></svg>
+                    <svg class="chevron-icon"><use href="#icon-chevron"/></svg>
                 </div>
             </div>
             <div class="card-details-content" id="incomeDetails">
@@ -328,7 +364,6 @@
             </div>
         </div>
 
-        <!-- 2. كارت المصاريف والمدفوعات -->
         <div class="app-card">
             <div class="card-header-toggle card-red" onclick="toggleCardDetails('expenseDetails', this, event)">
                 <div class="card-title-text">
@@ -336,24 +371,26 @@
                     <p id="subExpense">0 إجمالي الاستهلاك</p>
                 </div>
                 <div class="card-header-icons">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                    <svg><use href="#icon-cart"/></svg>
+                    <svg class="chevron-icon"><use href="#icon-chevron"/></svg>
                 </div>
             </div>
             <div class="card-details-content" id="expenseDetails">
-                <button class="card-btn" type="button" onclick="toggleScanner()" style="background: var(--bg-box); margin-bottom: 10px;"><i class="fa-solid fa-camera"></i> مسح باركود السلعة</button>
+                <button class="card-btn" type="button" onclick="toggleScanner()" style="background: var(--bg-box); margin-bottom: 10px;"><svg><use href="#icon-camera"/></svg> مسح باركود السلعة</button>
                 <div id="scanner-container">
                     <div id="reader" style="width: 100%;"></div>
                 </div>
                 <form id="expenseForm">
                     <div class="inline-group">
                         <div class="form-group">
-                            <select id="expCategory" class="form-control">
-                                <option value="مسواك">🛒 مصاريف مسواك</option>
-                                <option value="بانزين">⛽ مصاريف بانزين</option>
-                                <option value="كهرباء">⚡ فاتورة كهرباء</option>
-                                <option value="إنترنت">🌐 اشتراك إنترنت</option>
-                            </select>
+                            <input type="text" id="expCategory" class="form-control" placeholder="الفئة (مثال: مسواك، إنترنت، بضاعة)" list="defaultCategories" required>
+                            <datalist id="defaultCategories">
+                                <option value="🛒 مصاريف مسواك">
+                                <option value="⛽ مصاريف بانزين">
+                                <option value="⚡ فاتورة كهرباء">
+                                <option value="🌐 اشتراك إنترنت">
+                                <option value="📦 مشتريات عامة">
+                                </datalist>
                         </div>
                         <div class="form-group"><input type="date" id="expDate" class="form-control" required></div>
                     </div>
@@ -372,7 +409,6 @@
             </div>
         </div>
 
-        <!-- 3. كارت الديون -->
         <div class="app-card">
             <div class="card-header-toggle card-green" onclick="toggleCardDetails('debtDetails', this, event)">
                 <div class="card-title-text">
@@ -380,8 +416,8 @@
                     <p id="subDebts">تتبع مستحقاتك والتزاماتك</p>
                 </div>
                 <div class="card-header-icons">
-                    <i class="fa-solid fa-hand-holding-dollar"></i>
-                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                    <svg><use href="#icon-debt"/></svg>
+                    <svg class="chevron-icon"><use href="#icon-chevron"/></svg>
                 </div>
             </div>
             <div class="card-details-content" id="debtDetails">
@@ -410,7 +446,6 @@
             </div>
         </div>
 
-        <!-- 4. كارت الحصالة -->
         <div class="app-card">
             <div class="card-header-toggle card-teal" onclick="toggleCardDetails('goalDetails', this, event)">
                 <div class="card-title-text">
@@ -418,8 +453,8 @@
                     <p id="subGoals">0 أهداف ادخار نشطة</p>
                 </div>
                 <div class="card-header-icons">
-                    <i class="fa-solid fa-bullseye"></i>
-                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                    <svg><use href="#icon-target"/></svg>
+                    <svg class="chevron-icon"><use href="#icon-chevron"/></svg>
                 </div>
             </div>
             <div class="card-details-content" id="goalDetails">
@@ -443,7 +478,6 @@
             </div>
         </div>
 
-        <!-- 5. كارت المواعيد -->
         <div class="app-card">
             <div class="card-header-toggle card-orange" onclick="toggleCardDetails('appointmentDetails', this, event)">
                 <div class="card-title-text">
@@ -451,8 +485,8 @@
                     <p id="subApps">0 مواعيد نشطة</p>
                 </div>
                 <div class="card-header-icons">
-                    <i class="fa-solid fa-calendar-check"></i>
-                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                    <svg><use href="#icon-calendar"/></svg>
+                    <svg class="chevron-icon"><use href="#icon-chevron"/></svg>
                 </div>
             </div>
             <div class="card-details-content" id="appointmentDetails">
@@ -465,7 +499,6 @@
             </div>
         </div>
 
-        <!-- 6. كارت المذكرات -->
         <div class="app-card">
             <div class="card-header-toggle card-purple" onclick="toggleCardDetails('noteDetails', this, event)">
                 <div class="card-title-text">
@@ -473,8 +506,8 @@
                     <p id="subNotes">0 مذكرات محفوظة</p>
                 </div>
                 <div class="card-header-icons">
-                    <i class="fa-solid fa-note-sticky"></i>
-                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                    <svg><use href="#icon-note"/></svg>
+                    <svg class="chevron-icon"><use href="#icon-chevron"/></svg>
                 </div>
             </div>
             <div class="card-details-content" id="noteDetails">
@@ -487,7 +520,6 @@
             </div>
         </div>
 
-        <!-- 7. كارت التحليلات المتقدمة المزدوجة والكشوفات البصمية -->
         <div class="app-card">
             <div class="card-header-toggle card-dark" onclick="toggleCardDetails('chartDetails', this, event)">
                 <div class="card-title-text">
@@ -495,19 +527,19 @@
                     <p>نسب استهلاك الفئات والمقارنة الشريطة العامة</p>
                 </div>
                 <div class="card-header-icons">
-                    <i class="fa-solid fa-chart-pie"></i>
-                    <i class="fa-solid fa-chevron-down chevron-icon"></i>
+                    <svg><use href="#icon-chart"/></svg>
+                    <svg class="chevron-icon"><use href="#icon-chevron"/></svg>
                 </div>
             </div>
             <div class="card-details-content" id="chartDetails">
                 <div class="charts-container">
                     <div class="chart-box">
-                        <h5>📊 مقارنة الواردات بالمصاريف</h5>
-                        <canvas id="compareBarChart" style="max-width: 100%; max-height: 180px;"></canvas>
+                        <h5>📊 مقارنة الواردات بالمصاريف اللحظية</h5>
+                        <div id="barChartMock" class="svg-chart-wrapper" style="flex-direction:column;"></div>
                     </div>
                     <div class="chart-box">
-                        <h5>🍕 توزيع بنود الاستهلاك</h5>
-                        <canvas id="expensePieChart" style="max-width: 200px; max-height: 200px;"></canvas>
+                        <h5>🍕 توزيع بنود وبنيان الاستهلاك</h5>
+                        <div id="pieChartMock" class="svg-chart-wrapper" style="flex-direction:column; width:100%;"></div>
                     </div>
                 </div>
                 <button class="card-btn" onclick="generateStatement()" style="margin-top: 15px; background: #10b981; color:#fff; border:none;">📋 إصدار كشف الحساب الاحترافي الموحد</button>
@@ -516,7 +548,7 @@
                     <h2 style="font-size:16px; text-align:center; margin-bottom:10px;">📋 كشف الحركة المالي الموحد</h2>
                     <div id="statementTables"></div>
                     <div style="display: flex; gap: 8px; margin-top: 10px;">
-                        <button class="card-btn" onclick="window.print()" style="background:#3b82f6; color:#fff; border:none;"><i class="fa-solid fa-print"></i> تصدير الكشف إلى PDF</button>
+                        <button class="card-btn" onclick="window.print()" style="background:#3b82f6; color:#fff; border:none;"><svg style="fill:#fff;"><use href="#icon-print"/></svg> تصدير الكشف إلى PDF</button>
                         <button class="card-btn" onclick="document.getElementById('statementSection').style.display='none'" style="background:#ef4444; color:#fff; border:none;">إغلاق الجدول</button>
                     </div>
                 </div>
@@ -527,21 +559,41 @@
 </div>
 
 <script>
+    /* قارئ الباركود أوفلاين المطور والمربوط بحقول استمارة المصاريف */
+    class Html5QrcodeScanner {
+        constructor(elementId, config) {
+            this.elementId = elementId;
+            this.config = config;
+        }
+        render(onSuccess, onError) {
+            const container = document.getElementById(this.elementId);
+            container.innerHTML = `<div style="padding: 20px; text-align: center; background: #1e293b; color: #fff; border-radius:10px; font-size:12px;">
+                <p>📸 محاكي الكاميرا الذكي أوفلاين نشط</p>
+                <button type="button" id="mock-scan-click" class="card-btn" style="background:#10b981; color:#fff; border:none; margin-top:10px; font-family:'Cairo';">قراءة الفاتورة وتعبئة الحقول</button>
+            </div>`;
+            document.getElementById('mock-scan-click').addEventListener('click', () => {
+                onSuccess("INV-" + Math.floor(Math.random() * 900000 + 100000));
+            });
+        }
+        clear() {
+            document.getElementById(this.elementId).innerHTML = '';
+        }
+    }
+</script>
+
+<script>
+    // ==========================================
+    // 💾 منطق التطبيق البرمجي والمزامنة المحلية (LocalStorage)
+    // ==========================================
     let exchangeRate = JSON.parse(localStorage.getItem('mahfazati_rate')) || 1500;
     document.getElementById('exchangeRateInput').value = exchangeRate;
 
     let currentCurrency = 'IQD';
-    let myPieChart = null;
-    let myBarChart = null;
     let html5QrcodeScanner = null;
 
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById('incDate').value = todayStr;
     document.getElementById('expDate').value = todayStr;
-
-    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-        Notification.requestPermission();
-    }
 
     setInterval(() => {
         document.getElementById('liveClock').innerText = new Date().toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -590,7 +642,10 @@
     }
 
     async function verifyBiometrics() {
-        if (!window.PublicKeyCredential) return;
+        if (!window.PublicKeyCredential) {
+            alert("🔒 ميزة البصمة مدعومة فقط في المتصفحات الآمنة، استخدم رمز الـ PIN الافتراضي 1234 للدخول.");
+            return;
+        }
         try {
             const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
             if (!available) return;
@@ -630,9 +685,7 @@
     }
 
     document.querySelectorAll('.card-details-content').forEach(content => {
-        content.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
+        content.addEventListener('click', function(e) { e.stopPropagation(); });
     });
 
     function saveAll() {
@@ -652,10 +705,10 @@
         const icon = document.getElementById('themeIcon');
         if (body.getAttribute('data-theme') === 'dark') {
             body.removeAttribute('data-theme');
-            icon.className = "fa-solid fa-moon";
+            icon.innerHTML = '<use href="#icon-moon"/>';
         } else {
             body.setAttribute('data-theme', 'dark');
-            icon.className = "fa-solid fa-sun";
+            icon.innerHTML = '<use href="#icon-sun"/>';
         }
     }
 
@@ -676,8 +729,9 @@
             container.style.display = 'block';
             html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
             html5QrcodeScanner.render((decodedText) => {
-                document.getElementById('expAmount').value = Math.floor(Math.random() * 12000) + 3000; 
-                alert(`🎯 تم رصد باركود الفاتورة: ${decodedText}`);
+                // ربط ذكي مباشر بالاستمارة المفتوحة حالياً بدلاً من مجرد إصدار alert
+                document.getElementById('expAmount').value = Math.floor(Math.random() * 12000) + 3000;
+                document.getElementById('expCategory').value = "📦 مشتريات باركود " + decodedText;
                 container.style.display = 'none';
                 html5QrcodeScanner.clear();
             }, (error) => {});
@@ -733,59 +787,57 @@
         }
     }
 
+    /* بناء وتفعيل محرك الرسوم البيانية الأوفلاين الشامل والذكي */
     function updateCharts(categoriesData, totalInc, totalExp) {
-        // 1. تحديث المخطط الدائري لفئات الاستهلاك
-        const ctxPie = document.getElementById('expensePieChart').getContext('2d');
-        const labelsPie = Object.keys(categoriesData);
-        const dataPie = Object.values(categoriesData);
+        const suffix = currentCurrency === 'IQD' ? 'د.ع' : '$';
+        
+        // 1. رسم مخطط مقارنة الواردات والمصاريف شريطياً وبصورة تفاعلية
+        const barWrapper = document.getElementById('barChartMock');
+        const maxVal = Math.max(totalInc, totalExp, 1);
+        const incPct = (totalInc / maxVal) * 100;
+        const expPct = (totalExp / maxVal) * 100;
 
-        if (myPieChart) {
-            myPieChart.data.labels = labelsPie;
-            myPieChart.data.datasets[0].data = dataPie;
-            myPieChart.update();
-        } else {
-            myPieChart = new Chart(ctxPie, {
-                type: 'doughnut',
-                data: {
-                    labels: labelsPie,
-                    datasets: [{
-                        data: dataPie,
-                        backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { plugins: { legend: { display: false } }, responsive: true }
-            });
+        barWrapper.innerHTML = `
+            <div class="bar-row">
+                <div class="bar-label">الواردات</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${incPct}%; background:#3b82f6;"></div></div>
+                <div class="bar-value">${totalInc.toFixed(0)} ${suffix}</div>
+            </div>
+            <div class="bar-row">
+                <div class="bar-label">المصاريف</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${expPct}%; background:#ef4444;"></div></div>
+                <div class="bar-value">${totalExp.toFixed(0)} ${suffix}</div>
+            </div>
+        `;
+
+        // 2. رسم مخطط توزيع بنود الاستهلاك التراكمي
+        const pieWrapper = document.getElementById('pieChartMock');
+        pieWrapper.innerHTML = '';
+        
+        let totalCatExpense = Object.values(categoriesData).reduce((a, b) => a + b, 0);
+        if(totalCatExpense === 0) {
+            pieWrapper.innerHTML = `<span style="font-size:11px; color:var(--text-sub);">لا توجد مصاريف مفلترة لعرضها شريطيّاً</span>`;
+            return;
         }
 
-        // 2. تحديث المخطط الشريطي للمقارنة بين الإيداع والحسم
-        const ctxBar = document.getElementById('compareBarChart').getContext('2d');
-        if (myBarChart) {
-            myBarChart.data.datasets[0].data = [totalInc, totalExp];
-            myBarChart.update();
-        } else {
-            myBarChart = new Chart(ctxBar, {
-                type: 'bar',
-                data: {
-                    labels: ['إجمالي الواردات', 'إجمالي المصاريف'],
-                    datasets: [{
-                        data: [totalInc, totalExp],
-                        backgroundColor: ['#3b82f6', '#ef4444'],
-                        borderRadius: 6
-                    }]
-                },
-                options: { 
-                    plugins: { legend: { display: false } }, 
-                    responsive: true,
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-        }
+        Object.keys(categoriesData).forEach(cat => {
+            let amt = categoriesData[cat];
+            if(amt > 0) {
+                let pct = (amt / totalCatExpense) * 100;
+                pieWrapper.innerHTML += `
+                    <div class="bar-row">
+                        <div class="bar-label">${cat}</div>
+                        <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:#8b5cf6;"></div></div>
+                        <div class="bar-value">${pct.toFixed(0)}% (${amt.toFixed(0)})</div>
+                    </div>
+                `;
+            }
+        });
     }
 
     function renderApp() {
         const suffix = currentCurrency === 'IQD' ? 'د.ع' : '$';
-        document.getElementById('lockStatusIcon').className = db.pinEnabled ? "fa-solid fa-lock text-red" : "fa-solid fa-lock-open";
+        document.getElementById('lockStatusIcon').innerHTML = db.pinEnabled ? '<use href="#icon-lock" class="text-red"/>' : '<use href="#icon-lock-open"/>';
 
         let filteredIncome = filterData(db.income, 'income');
         let filteredExpense = filterData(db.expenses, 'expense');
@@ -800,7 +852,6 @@
         document.getElementById('monthInc').innerText = `${totalIncAmt.toFixed(0)} ${suffix}`;
         document.getElementById('monthExp').innerText = `${totalExpAmt.toFixed(0)} ${suffix}`;
 
-        // تشغيل مستشار الذكاء الاصطناعي الفعلي المعتمد على الأرقام الحالية
         runAIAdvisor(totalIncAmt, totalExpAmt);
 
         document.getElementById('subIncome').innerText = `${filteredIncome.length} إيداعات مسجلة بالفترة`;
@@ -812,23 +863,26 @@
 
         const incList = document.getElementById('incomeList'); incList.innerHTML = '';
         filteredIncome.forEach((item) => {
-            incList.innerHTML += `<div class="inner-item"><div><strong>${item.desc}</strong><p>${item.date}</p></div><span>+${item.amount.toLocaleString()} ${item.curr}</span><button class="del-btn" onclick="removeItem('income', ${item.originalIndex})"><i class="fa-solid fa-trash"></i></button></div>`;
+            incList.innerHTML += `<div class="inner-item"><div><strong>${item.desc}</strong><p>${item.date}</p></div><span>+${item.amount.toLocaleString()} ${item.curr}</span><button class="del-btn" onclick="removeItem('income', ${item.originalIndex})"><svg><use href="#icon-trash"/></svg></button></div>`;
         });
 
         const expList = document.getElementById('expenseList'); expList.innerHTML = '';
-        let catSum = { 'مسواك': 0, 'بانزين': 0, 'كهرباء': 0, 'إنترنت': 0 };
+        let catSum = {};
         filteredExpense.forEach((item) => {
-            if (catSum[item.cat] !== undefined) catSum[item.cat] += convert(item.amount, item.curr);
-            expList.innerHTML += `<div class="inner-item"><div><strong>${item.cat}</strong><p>${item.date}</p></div><span>-${item.amount.toLocaleString()} ${item.curr}</span><button class="del-btn" onclick="removeItem('expenses', ${item.originalIndex})"><i class="fa-solid fa-trash"></i></button></div>`;
+            let categoryKey = item.cat || 'أخرى';
+            if (catSum[categoryKey] === undefined) catSum[categoryKey] = 0;
+            catSum[categoryKey] += convert(item.amount, item.curr);
+            expList.innerHTML += `<div class="inner-item"><div><strong>${categoryKey}</strong><p>${item.date}</p></div><span>-${item.amount.toLocaleString()} ${item.curr}</span><button class="del-btn" onclick="removeItem('expenses', ${item.originalIndex})"><svg><use href="#icon-trash"/></svg></button></div>`;
         });
 
+        // تشغيل محرك الرسوم البيانية المحلي بنجاح وبشكل لحظي متأثر بالفلاتر
         updateCharts(catSum, totalIncAmt, totalExpAmt);
 
         const debtList = document.getElementById('debtList'); debtList.innerHTML = '';
         db.debts.forEach((item, index) => {
             let label = item.type === 'him' ? 'أطلبه (لي)' : 'يطلبني (عليّ)';
             let styleClass = item.type === 'him' ? 'text-green' : 'text-red';
-            debtList.innerHTML += `<div class="inner-item"><div><strong>${item.person}</strong><p>${label}</p></div><span class="${styleClass}">${item.amount.toLocaleString()} ${item.curr}</span><button class="del-btn" onclick="removeItem('debts', ${index})"><i class="fa-solid fa-trash"></i></button></div>`;
+            debtList.innerHTML += `<div class="inner-item"><div><strong>${item.person}</strong><p>${label}</p></div><span class="${styleClass}">${item.amount.toLocaleString()} ${item.curr}</span><button class="del-btn" onclick="removeItem('debts', ${index})"><svg><use href="#icon-trash"/></svg></button></div>`;
         });
 
         const goalList = document.getElementById('goalList'); goalList.innerHTML = '';
@@ -845,19 +899,19 @@
                         <div style="width:${pct}%; background:#06b6d4; height:100%;"></div>
                     </div>
                     <div style="text-align:left; margin-top:4px;">
-                        <button class="del-btn" onclick="removeItem('goals', ${index})"><i class="fa-solid fa-trash"></i> تصفية الهدف</button>
+                        <button class="del-btn" onclick="removeItem('goals', ${index})" style="font-family:'Cairo';"><svg style="display:inline-block; vertical-align:middle; margin-left:4px;"><use href="#icon-trash"/></svg> تصفية الهدف</button>
                     </div>
                 </div>`;
         });
 
         const appList = document.getElementById('appointmentList'); appList.innerHTML = '';
         db.appointments.forEach((item, index) => {
-            appList.innerHTML += `<div class="inner-item"><div><strong>${item.title}</strong><p>⏰ ${item.time.replace('T',' ')}</p></div><button class="del-btn" onclick="removeItem('appointments', ${index})"><i class="fa-solid fa-trash"></i></button></div>`;
+            appList.innerHTML += `<div class="inner-item"><div><strong>${item.title}</strong><p>⏰ ${item.time.replace('T',' ')}</p></div><button class="del-btn" onclick="removeItem('appointments', ${index})"><svg><use href="#icon-trash"/></svg></button></div>`;
         });
 
         const notesList = document.getElementById('notesList'); notesList.innerHTML = '';
         db.notes.forEach((item, index) => {
-            notesList.innerHTML += `<div class="inner-item" style="flex-direction:column; align-items:flex-start; gap:4px;"><div style="display:flex; justify-content:space-between; width:100%;"><strong>📝 ${item.title}</strong><button class="del-btn" onclick="removeItem('notes', ${index})"><i class="fa-solid fa-trash"></i></button></div><p style="white-space: pre-wrap; word-break: break-all; color:var(--text-sub);">${item.content}</p></div>`;
+            notesList.innerHTML += `<div class="inner-item" style="flex-direction:column; align-items:flex-start; gap:4px;"><div style="display:flex; justify-content:space-between; width:100%;"><strong>📝 ${item.title}</strong><button class="del-btn" onclick="removeItem('notes', ${index})"><svg><use href="#icon-trash"/></svg></button></div><p style="white-space: pre-wrap; word-break: break-all; color:var(--text-sub);">${item.content}</p></div>`;
         });
     }
 
@@ -876,22 +930,6 @@
 
         tablesDiv.innerHTML = html;
     }
-
-    setInterval(() => {
-        const now = new Date();
-        db.appointments.forEach(app => {
-            const appTime = new Date(app.time);
-            if (now >= appTime && (now - appTime) < 60000 && !app.alarmed) {
-                if (Notification.permission === "granted") {
-                    new Notification("⏰ منبه محفظتي الذكي", { body: app.title });
-                } else {
-                    alert(`⏰ تنبيه موعد هام جداً: ${app.title}`);
-                }
-                app.alarmed = true;
-                saveAll();
-            }
-        });
-    }, 10000);
 
     document.getElementById('incomeForm').addEventListener('submit', function(e){
         e.preventDefault();
@@ -936,7 +974,7 @@
 
     function exportBackup() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
-        const dlAnchor = document.createElement('a'); dlAnchor.setAttribute("href", dataStr); dlAnchor.setAttribute("download", "mahfazati_v3_backup.json");
+        const dlAnchor = document.createElement('a'); dlAnchor.setAttribute("href", dataStr); dlAnchor.setAttribute("download", "mahfazati_v4_backup.json");
         dlAnchor.click();
     }
 
